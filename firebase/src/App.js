@@ -2,13 +2,14 @@ import { useEffect, useState } from 'react';
 import './App.css';
 import { Auth } from './components/auth';
 import { db } from "./config/Firebase"
-import { getDocs, collection, addDoc } from "firebase/firestore"
+import { getDocs, collection, addDoc, deleteDoc, doc, updateDoc } from "firebase/firestore"
 
 function App() {
   const [movieList, setMovieList] = useState([])
   const [movieTitle, setMovieTitle] = useState(0)
   const [movieYear, setMovieYear] = useState('')
   const [oscar, setOscar] = useState(false)
+  const [updateTitle, setUpdateTitle]= useState('')
   const moviesCollectionRef = collection(db, "movies")
   const getMovieList = async () => {
     try {
@@ -41,6 +42,18 @@ function App() {
 
   }
 
+  const deleteMovie = async (id)=>{
+    const movieDoc = doc(db, "movies", id)
+    await deleteDoc(movieDoc)
+    getMovieList()
+  }
+
+  const updateMovie = async(id)=>{
+    const movieDoc = doc(db, "movies", id)
+    await updateDoc(movieDoc, {title: updateTitle})
+    getMovieList()
+  }
+
 
 
   return (
@@ -63,6 +76,9 @@ function App() {
 
               <h1 style={{ color: movie.receivedAnOscar ? "green" : "red" }}>{movie.title}</h1>
               <p>{movie.releaseDate}</p>
+              <button onClick={()=>deleteMovie(movie.id)}>delete</button>
+              <input placeholder='input title' onChange={(e)=>setUpdateTitle(e.target.value)} />
+              <button onClick={()=> updateMovie(movie.id)}>update title</button>
             </div>
           )
         })}
